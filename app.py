@@ -42,9 +42,8 @@ model_features = [
     'Age Group_35-54', 'Age Group_55-74', 'Age Group_75+',
     'Gender_Male',
     'Method_ Firearms', 'Method_ Poisoning ', 'Method_ Suffocation ',
-    'Method_ Other and low-count methods ', 'Method_ Other suicide ',
-    'State of Death_' + s for s in states
-]
+    'Method_ Other and low-count methods ', 'Method_ Other suicide '
+] + [f"State of Death_{s}" for s in states]
 
 # Create DataFrame with zeros
 input_df = pd.DataFrame([[0]*len(model_features)], columns=model_features)
