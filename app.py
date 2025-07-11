@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
@@ -17,17 +16,17 @@ suicide_rate = st.number_input("Veteran Suicide Rate per 100,000", min_value=0.0
 age_35_54 = st.checkbox("Age Group 35-54")
 gender_male = st.checkbox("Male")
 state_ca = st.checkbox("California")
-method_firearm = st.checkbox("Firearm Method")
+method_other_suicide = st.checkbox("Other Suicide Method")
 
 # Define all model features as columns
 model_features = [
     'Year', 'Veteran Suicide Rate per 100,000',
     'Age Group_35-54', 'Age Group_55-74', 'Age Group_75+',
     'Gender_Male',
-    'Method_ Firearms', 'Method_ Poisoning ', 'Method_ Suffocation ',
     'Method_ Other and low-count methods ', 'Method_ Other suicide ',
-    'State of Death_California', 'State of Death_Alaska', 'State of Death_Arizona',
-    'State of Death_Arkansas', 'State of Death_Colorado', 'State of Death_Connecticut',
+    'Method_ Poisoning ', 'Method_ Suffocation ',
+    'State of Death_Alaska', 'State of Death_Arizona', 'State of Death_Arkansas',
+    'State of Death_California', 'State of Death_Colorado', 'State of Death_Connecticut',
     'State of Death_Delaware', 'State of Death_Florida', 'State of Death_Georgia',
     'State of Death_Hawaii', 'State of Death_Idaho', 'State of Death_Illinois',
     'State of Death_Indiana', 'State of Death_Iowa', 'State of Death_Kansas',
@@ -54,11 +53,13 @@ input_df.at[0, 'Veteran Suicide Rate per 100,000'] = suicide_rate
 input_df.at[0, 'Age Group_35-54'] = int(age_35_54)
 input_df.at[0, 'Gender_Male'] = int(gender_male)
 input_df.at[0, 'State of Death_California'] = int(state_ca)
-input_df.at[0, 'Method_ Firearms'] = int(method_firearm)
-
+input_df.at[0, 'Method_ Other suicide '] = int(method_other_suicide)
 
 # Prediction
 if st.button("Predict Risk"):
     prediction = model.predict(input_df)[0]
+    probability = model.predict_proba(input_df)[0][1]
+    st.success(f"Predicted High Risk: {prediction} (Probability: {probability:.2f})")
+
     probability = model.predict_proba(input_df)[0][1]
     st.success(f"Predicted High Risk: {prediction} (Probability: {probability:.2f})")
