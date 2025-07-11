@@ -2,29 +2,16 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load trained model
+# Load model
 model = joblib.load("best_random_forest_model.joblib")
 
-st.title("Veteran High Risk Prediction Tool")
-
-# Input form
-st.header("Enter Veteran Profile Info")
-year = st.number_input("Year", min_value=2000, max_value=2030, value=2024)
-suicide_rate = st.number_input("Veteran Suicide Rate per 100,000", min_value=0.0)
-
-# Simulated feature toggles
-age_35_54 = st.checkbox("Age Group 35-54")
-gender_male = st.checkbox("Male")
-state_ca = st.checkbox("California")
-method_other_suicide = st.checkbox("Other Suicide Method")
-
-# Define all model features as columns
+# Feature list (exactly what model expects)
 model_features = [
     'Year', 'Veteran Suicide Rate per 100,000',
     'Age Group_35-54', 'Age Group_55-74', 'Age Group_75+',
     'Gender_Male',
-    'Method_ Other and low-count methods ', 'Method_ Other suicide ',
-    'Method_ Poisoning ', 'Method_ Suffocation ',
+    'Method_ Other and low-count methods ', 'Method_ Other suicide ', 'Method_ Poisoning ',
+    'Method_ Suffocation ',
     'State of Death_Alaska', 'State of Death_Arizona', 'State of Death_Arkansas',
     'State of Death_California', 'State of Death_Colorado', 'State of Death_Connecticut',
     'State of Death_Delaware', 'State of Death_Florida', 'State of Death_Georgia',
@@ -44,22 +31,35 @@ model_features = [
     'State of Death_Wyoming'
 ]
 
-# Create a blank input row with all zeros
-input_df = pd.DataFrame([[0] * len(model_features)], columns=model_features)
+st.title("Veteran High Risk Prediction Tool")
+st.header("Enter Veteran Profile Info")
 
-# Fill in actual user data
+# Form inputs
+year = st.number_input("Year", min_value=2000, max_value=2030, value=2024)
+suicide_rate = st.number_input("Veteran Suicide Rate per 100,000", min_value=0.0)
+
+# Sample limited toggles
+age_35_54 = st.checkbox("Age Group 35-54")
+gender_male = st.checkbox("Male")
+state_ca = st.checkbox("California")
+other_suicide_method = st.checkbox("Other Suicide Method")
+
+# Build input data
+input_df = pd.DataFrame([[0]*len(model_features)], columns=model_features)
+
 input_df.at[0, 'Year'] = year
 input_df.at[0, 'Veteran Suicide Rate per 100,000'] = suicide_rate
 input_df.at[0, 'Age Group_35-54'] = int(age_35_54)
 input_df.at[0, 'Gender_Male'] = int(gender_male)
 input_df.at[0, 'State of Death_California'] = int(state_ca)
-input_df.at[0, 'Method_ Other suicide '] = int(method_other_suicide)
+input_df.at[0, 'Method_ Other suicide '] = int(other_suicide_method)
 
-# Prediction
+# Predict
 if st.button("Predict Risk"):
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0][1]
     st.success(f"Predicted High Risk: {prediction} (Probability: {probability:.2f})")
+
 
     probability = model.predict_proba(input_df)[0][1]
     st.success(f"Predicted High Risk: {prediction} (Probability: {probability:.2f})")
