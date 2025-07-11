@@ -2,16 +2,23 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load model
+# Load trained model
 model = joblib.load("best_random_forest_model.joblib")
 
-# Feature list (exactly what model expects)
+st.title("Veteran High Risk Prediction Tool")
+st.header("Enter Veteran Profile Info")
+
+# Basic numeric inputs
+year = st.number_input("Year", min_value=2000, max_value=2030, value=2024)
+suicide_rate = st.number_input("Veteran Suicide Rate per 100,000", min_value=0.0)
+
+# Define model features
 model_features = [
     'Year', 'Veteran Suicide Rate per 100,000',
     'Age Group_35-54', 'Age Group_55-74', 'Age Group_75+',
     'Gender_Male',
-    'Method_ Other and low-count methods ', 'Method_ Other suicide ', 'Method_ Poisoning ',
-    'Method_ Suffocation ',
+    'Method_ Other and low-count methods ', 'Method_ Other suicide ',
+    'Method_ Poisoning ', 'Method_ Suffocation ',
     'State of Death_Alaska', 'State of Death_Arizona', 'State of Death_Arkansas',
     'State of Death_California', 'State of Death_Colorado', 'State of Death_Connecticut',
     'State of Death_Delaware', 'State of Death_Florida', 'State of Death_Georgia',
@@ -31,34 +38,41 @@ model_features = [
     'State of Death_Wyoming'
 ]
 
-st.title("Veteran High Risk Prediction Tool")
-st.header("Enter Veteran Profile Info")
-
-# Form inputs
-year = st.number_input("Year", min_value=2000, max_value=2030, value=2024)
-suicide_rate = st.number_input("Veteran Suicide Rate per 100,000", min_value=0.0)
-
-# Sample limited toggles
-age_35_54 = st.checkbox("Age Group 35-54")
-gender_male = st.checkbox("Male")
-state_ca = st.checkbox("California")
-other_suicide_method = st.checkbox("Other Suicide Method")
-
-# Build input data
-input_df = pd.DataFrame([[0]*len(model_features)], columns=model_features)
-
+# Create empty input DataFrame
+input_df = pd.DataFrame([[0] * len(model_features)], columns=model_features)
 input_df.at[0, 'Year'] = year
 input_df.at[0, 'Veteran Suicide Rate per 100,000'] = suicide_rate
-input_df.at[0, 'Age Group_35-54'] = int(age_35_54)
-input_df.at[0, 'Gender_Male'] = int(gender_male)
-input_df.at[0, 'State of Death_California'] = int(state_ca)
-input_df.at[0, 'Method_ Other suicide '] = int(other_suicide_method)
 
-# Predict
+# Age Group checkboxes
+st.subheader("Age Group")
+input_df.at[0, 'Age Group_35-54'] = int(st.checkbox("35–54"))
+input_df.at[0, 'Age Group_55-74'] = int(st.checkbox("55–74"))
+input_df.at[0, 'Age Group_75+'] = int(st.checkbox("75+"))
+
+# Gender checkbox
+st.subheader("Gender")
+input_df.at[0, 'Gender_Male'] = int(st.checkbox("Male"))
+
+# Suicide Method checkboxes
+st.subheader("Suicide Method")
+input_df.at[0, 'Method_ Other and low-count methods '] = int(st.checkbox("Other/Low-Count Methods"))
+input_df.at[0, 'Method_ Other suicide '] = int(st.checkbox("Other Suicide"))
+input_df.at[0, 'Method_ Poisoning '] = int(st.checkbox("Poisoning"))
+input_df.at[0, 'Method_ Suffocation '] = int(st.checkbox("Suffocation"))
+
+# State checkboxes
+st.subheader("State of Death")
+for feature in model_features:
+    if feature.startswith("State of Death_"):
+        state_name = feature.replace("State of Death_", "").strip()
+        input_df.at[0, feature] = int(st.checkbox(state_name))
+
+# Prediction button
 if st.button("Predict Risk"):
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0][1]
     st.success(f"Predicted High Risk: {prediction} (Probability: {probability:.2f})")
+
 
 
     probability = model.predict_proba(input_df)[0][1]
